@@ -1,4 +1,6 @@
-package com.example.aifitnesstrainer
+package com.example.aifitnesstrainer.datalayer.models
+
+import com.example.aifitnesstrainer.datalayer.ml.KeyPoint
 
 data class BoundingBox(
     val x1: Float,

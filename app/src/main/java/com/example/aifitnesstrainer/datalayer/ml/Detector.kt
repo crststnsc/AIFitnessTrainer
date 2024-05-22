@@ -1,12 +1,12 @@
-package com.example.aifitnesstrainer
+package com.example.aifitnesstrainer.datalayer.ml
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.media.Image
 import android.os.SystemClock
+import com.example.aifitnesstrainer.datalayer.models.BoundingBox
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.CompatibilityList
@@ -17,7 +17,6 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-import java.io.IOException
 
 class Detector(
     private val context: Context,
@@ -133,7 +132,7 @@ class Detector(
                 if (y2 <= 0F || y2 >= tensorHeight) continue
 
                 // Extract keypoints
-                var keypoints = mutableListOf<KeyPoint>()
+                val keypoints = mutableListOf<KeyPoint>()
                 for (k in 0 until 16) {
                     var kx = array[c + numElements * (5 + k * 2)]
                     var ky = array[c + numElements * (5 + k * 2 + 1)]

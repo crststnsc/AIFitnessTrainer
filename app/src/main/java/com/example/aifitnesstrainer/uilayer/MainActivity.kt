@@ -1,4 +1,4 @@
-package com.example.aifitnesstrainer
+package com.example.aifitnesstrainer.uilayer
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -32,7 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.example.aifitnesstrainer.datalayer.models.BoundingBox
+import com.example.aifitnesstrainer.datalayer.models.Constants
+import com.example.aifitnesstrainer.uilayer.viewmodels.MainViewModel
+import com.example.aifitnesstrainer.datalayer.ml.Detector
 import com.example.aifitnesstrainer.ui.theme.AIFitnessTrainerTheme
+import com.example.aifitnesstrainer.uilayer.views.OverlayViewComposable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -217,29 +222,6 @@ fun InferenceTimeView(inferenceTime: Long) {
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         )
-    }
-}
-
-@Composable
-fun BoundingBoxOverlay(boundingBoxes: List<BoundingBox>) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        boundingBoxes.forEach { box ->
-            // Draw bounding box
-            drawRect(
-                color = Color.Green,
-                topLeft = Offset(box.x1 * size.width, box.y1 * size.height),
-                size = Size(box.w * size.width, box.h * size.height),
-                style = Stroke(width = 2f)
-            )
-            // Draw keypoints
-            box.keyPoints.forEach { keypoint ->
-                drawCircle(
-                    color = Color.Red,
-                    radius = 8f,
-                    center = Offset(keypoint.x * size.width , keypoint.y * size.height)
-                )
-            }
-        }
     }
 }
 

@@ -1,6 +1,7 @@
-package com.example.aifitnesstrainer
+package com.example.aifitnesstrainer.uilayer.viewmodels
 
 import androidx.lifecycle.ViewModel
+import com.example.aifitnesstrainer.datalayer.models.BoundingBox
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

@@ -1,26 +1,19 @@
-package com.example.aifitnesstrainer
+package com.example.aifitnesstrainer.uilayer.views
 
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 
-import androidx.core.content.ContextCompat
-import com.example.aifitnesstrainer.BoundingBox
-import com.example.aifitnesstrainer.R
-import java.util.LinkedList
-import kotlin.math.max
+import com.example.aifitnesstrainer.datalayer.models.BoundingBox
 
 class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
@@ -54,6 +47,16 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         strokeWidth = 10f
     }
 
+    private val edges = listOf(
+        Pair(0, 1), Pair(1, 2), // right leg
+        Pair(4, 5), Pair(3, 4), // left leg
+        Pair(2, 6), Pair(6,3), // connect hips
+        Pair(10, 11), Pair(11, 12), // right arm
+        Pair(13, 14), Pair(14, 15), // left arm
+        Pair(13, 7), Pair(7, 12), // connect shoulders
+        Pair(6, 7) // connect upper and lower body
+    )
+
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
@@ -65,6 +68,22 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 
                 // Draw a circle at each keypoint
                 canvas.drawCircle(keypointX, keypointY, KEYPOINT_RADIUS, keypointPaint)
+            }
+        }
+
+        if (results.isNotEmpty()){
+            results.forEach { boundingBox ->
+                for (edge in edges) {
+                    val start = boundingBox.keyPoints[edge.first]
+                    val end = boundingBox.keyPoints[edge.second]
+                    canvas.drawLine(
+                        start.x * width,
+                        start.y * height,
+                        end.x * width,
+                        end.y * height,
+                        boxPaint
+                    )
+                }
             }
         }
     }
