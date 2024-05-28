@@ -12,8 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.aifitnesstrainer.datalayer.ml.KeyPoint
 
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
+import com.example.aifitnesstrainer.datalayer.models.Constants
+import kotlin.math.acos
+import kotlin.math.sqrt
 
 class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
@@ -27,7 +31,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     }
 
     private fun initPaints() {
-        textBackgroundPaint.color = Color.BLACK
+        textBackgroundPaint.color = Color.WHITE
         textBackgroundPaint.style = Paint.Style.FILL
         textBackgroundPaint.textSize = 50f
 
@@ -54,39 +58,76 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         Pair(10, 11), Pair(11, 12), // right arm
         Pair(13, 14), Pair(14, 15), // left arm
         Pair(13, 7), Pair(7, 12), // connect shoulders
-        Pair(6, 7) // connect upper and lower body
+        Pair(2, 12), Pair(3, 13) // connect upper and lower body
     )
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
-        results.forEach { boundingBox ->
-            boundingBox.keyPoints.forEach { keypoint ->
-                // Scale the keypoint coordinates considering the aspect ratio
-                val keypointX = keypoint.x * width
-                val keypointY = keypoint.y * height
+        // Pre-compute scaled keypoints and joint angles
+        val scaledKeyPoints = results.map { boundingBox ->
+            boundingBox.keyPoints.map { keypoint ->
+                Pair(keypoint.x * width, keypoint.y * height)
+            }
+        }
 
-                // Draw a circle at each keypoint
+        val jointAngles = if (results.isNotEmpty()) {
+            Constants.JOINTS_ANGLE_POINTS.map { joint ->
+                val (start, middle, end) = joint.value
+                val angle = getAngle(
+                    results[0].keyPoints[start.value],
+                    results[0].keyPoints[middle.value],
+                    results[0].keyPoints[end.value]
+                )
+                Pair(middle.value, angle)
+            }
+        } else {
+            emptyList()
+        }
+
+        // Draw keypoints
+        scaledKeyPoints.forEach { boundingBox ->
+            boundingBox.forEach { (keypointX, keypointY) ->
                 canvas.drawCircle(keypointX, keypointY, KEYPOINT_RADIUS, keypointPaint)
             }
         }
 
-        if (results.isNotEmpty()){
-            results.forEach { boundingBox ->
-                for (edge in edges) {
-                    val start = boundingBox.keyPoints[edge.first]
-                    val end = boundingBox.keyPoints[edge.second]
-                    canvas.drawLine(
-                        start.x * width,
-                        start.y * height,
-                        end.x * width,
-                        end.y * height,
-                        boxPaint
-                    )
-                }
+        // Draw edges and joint angles
+        if (results.isNotEmpty()) {
+            val boundingBox = scaledKeyPoints[0]
+            edges.forEach { edge ->
+                val (startX, startY) = boundingBox[edge.first]
+                val (endX, endY) = boundingBox[edge.second]
+                canvas.drawLine(startX, startY, endX, endY, boxPaint)
+            }
+
+            jointAngles.forEach { (middleIndex, angle) ->
+                val (x, y) = boundingBox[middleIndex]
+                canvas.drawText("${angle}°", x, y, textPaint)
             }
         }
     }
+
+    private fun getAngle(
+        startKeyPoint: KeyPoint,
+        midKeyPoint: KeyPoint,
+        endKeyPoint: KeyPoint
+    ): Int {
+        val start = Pair(startKeyPoint.x, startKeyPoint.y)
+        val mid = Pair(midKeyPoint.x, midKeyPoint.y)
+        val end = Pair(endKeyPoint.x, endKeyPoint.y)
+
+        val v1 = Pair(mid.first - start.first, mid.second - start.second)
+        val v2 = Pair(mid.first - end.first, mid.second - end.second)
+
+        val dotProduct = v1.first * v2.first + v1.second * v2.second
+        val magnitudeV1 = sqrt((v1.first * v1.first + v1.second * v1.second).toDouble())
+        val magnitudeV2 = sqrt((v2.first * v2.first + v2.second * v2.second).toDouble())
+
+        val angle = Math.toDegrees(acos(dotProduct / (magnitudeV1 * magnitudeV2)))
+        return angle.toInt()
+    }
+
 
     fun setResults(boundingBoxes: List<BoundingBox>) {
         results = boundingBoxes

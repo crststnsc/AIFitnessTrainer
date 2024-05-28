@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener {
             }
         }
         cameraExecutor.execute {
-            detector = Detector(baseContext, Constants.MODEL_PATH, this)
+            detector = Detector(baseContext, Constants.MODELS[0], this)
             detector?.setup()
         }
     }
