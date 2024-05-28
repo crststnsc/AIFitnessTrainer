@@ -22,6 +22,7 @@ import kotlin.math.sqrt
 class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     private var results = listOf<BoundingBox>()
+    private var jointAngles = listOf<Pair<Int, Int>>()
     private var boxPaint = Paint()
     private var textBackgroundPaint = Paint()
     private var textPaint = Paint()
@@ -71,20 +72,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             }
         }
 
-        val jointAngles = if (results.isNotEmpty()) {
-            Constants.JOINTS_ANGLE_POINTS.map { joint ->
-                val (start, middle, end) = joint.value
-                val angle = getAngle(
-                    results[0].keyPoints[start.value],
-                    results[0].keyPoints[middle.value],
-                    results[0].keyPoints[end.value]
-                )
-                Pair(middle.value, angle)
-            }
-        } else {
-            emptyList()
-        }
-
         // Draw keypoints
         scaledKeyPoints.forEach { boundingBox ->
             boundingBox.forEach { (keypointX, keypointY) ->
@@ -108,44 +95,23 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         }
     }
 
-    private fun getAngle(
-        startKeyPoint: KeyPoint,
-        midKeyPoint: KeyPoint,
-        endKeyPoint: KeyPoint
-    ): Int {
-        val start = Pair(startKeyPoint.x, startKeyPoint.y)
-        val mid = Pair(midKeyPoint.x, midKeyPoint.y)
-        val end = Pair(endKeyPoint.x, endKeyPoint.y)
-
-        val v1 = Pair(mid.first - start.first, mid.second - start.second)
-        val v2 = Pair(mid.first - end.first, mid.second - end.second)
-
-        val dotProduct = v1.first * v2.first + v1.second * v2.second
-        val magnitudeV1 = sqrt((v1.first * v1.first + v1.second * v1.second).toDouble())
-        val magnitudeV2 = sqrt((v2.first * v2.first + v2.second * v2.second).toDouble())
-
-        val angle = Math.toDegrees(acos(dotProduct / (magnitudeV1 * magnitudeV2)))
-        return angle.toInt()
-    }
-
-
-    fun setResults(boundingBoxes: List<BoundingBox>) {
+    fun setResults(boundingBoxes: List<BoundingBox>, jointAngles: List<Pair<Int, Int>>) {
         results = boundingBoxes
+        this.jointAngles = jointAngles
         postInvalidate()
     }
 
 }
 
 @Composable
-fun OverlayViewComposable(results: List<BoundingBox>) {
+fun OverlayViewComposable(results: List<BoundingBox>, jointAngles: List<Pair<Int, Int>>) {
     AndroidView(
         modifier = Modifier.aspectRatio(3f/4f).fillMaxSize(),
         factory = { context ->
             OverlayView(context, null)
         },
         update = { view ->
-            Log.d("OverlayViewComposable", "Updating OverlayView with ${results.size} results")
-            view.setResults(results)
+            view.setResults(results, jointAngles)
         }
     )
 }

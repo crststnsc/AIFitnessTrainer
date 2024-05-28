@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener {
                 ) {
                     val results by viewModel.results.collectAsState()
                     val inferenceTime by viewModel.inferenceTime.collectAsState()
+                    val jointAngles by viewModel.jointAngles.collectAsState()
 
                     Box(modifier = Modifier.fillMaxSize()) {
                         CameraPreview(
@@ -68,7 +69,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener {
                             executor = cameraExecutor
                         )
                         InferenceTimeView(inferenceTime = inferenceTime)
-                        OverlayViewComposable(results = results)
+                        OverlayViewComposable(results = results, jointAngles = jointAngles)
                     }
 
                 }
