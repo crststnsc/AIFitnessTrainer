@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -14,18 +15,17 @@ import androidx.activity.viewModels
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -39,19 +39,27 @@ import com.example.aifitnesstrainer.uilayer.viewmodels.MainViewModel
 import com.example.aifitnesstrainer.datalayer.ml.Detector
 import com.example.aifitnesstrainer.ui.theme.AIFitnessTrainerTheme
 import com.example.aifitnesstrainer.uilayer.views.OverlayViewComposable
+import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class MainActivity : ComponentActivity(), Detector.DetectorListener {
+class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeech.OnInitListener {
     private var isFrontCamera by mutableStateOf(true)
     private var detector: Detector? = null
     private lateinit var cameraExecutor: ExecutorService
 
     private val viewModel: MainViewModel by viewModels()
+    private lateinit var textToSpeech: TextToSpeech
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
+        textToSpeech = TextToSpeech(this, this)
+
+        viewModel.registerSpeakCallback { text ->
+            speak(text)
+        }
+
         setContent {
             AIFitnessTrainerTheme {
                 Surface(
@@ -61,19 +69,23 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener {
                     val results by viewModel.results.collectAsState()
                     val inferenceTime by viewModel.inferenceTime.collectAsState()
                     val jointAngles by viewModel.jointAngles.collectAsState()
+                    val movementProgress by viewModel.movementProgress.collectAsState()
 
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CameraPreview(
-                            isFrontCamera = isFrontCamera,
-                            switchCamera = { isFrontCamera = !isFrontCamera },
-                            detector = detector,
-                            executor = cameraExecutor
-                        )
-                        InferenceTimeView(inferenceTime = inferenceTime)
-                        OverlayViewComposable(results = results, jointAngles = jointAngles)
-                        FeedbackView(viewModel = viewModel)
+                    Column(modifier=Modifier.fillMaxSize()) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            CameraPreview(
+                                isFrontCamera = isFrontCamera,
+                                switchCamera = { isFrontCamera = !isFrontCamera },
+                                detector = detector,
+                                executor = cameraExecutor
+                            )
+                            InferenceTimeView(inferenceTime = inferenceTime)
+                            OverlayViewComposable(results = results, jointAngles = jointAngles)
+                            FeedbackView(viewModel = viewModel)
+                        }
+                        MovementProgressBar(progress = movementProgress)
+                        MovementSwitcher(viewModel)
                     }
-
                 }
             }
         }
@@ -83,10 +95,18 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener {
         }
     }
 
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            textToSpeech.language = Locale.US
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         detector?.close()
         cameraExecutor.shutdown()
+        textToSpeech.stop()
+        textToSpeech.shutdown()
     }
 
     override fun onEmptyDetect() {
@@ -98,6 +118,41 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener {
     override fun onDetect(boundingBoxes: List<BoundingBox>, inferenceTime: Long) {
         runOnUiThread {
             viewModel.updateResults(boundingBoxes, inferenceTime)
+        }
+    }
+
+    private fun speak(text: String) {
+        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+    }
+}
+
+@Composable
+fun MovementProgressBar(progress: Float) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(30.dp)
+            .background(Color.Gray, shape = RoundedCornerShape(8.dp))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(progress)
+                .background(Color.Green, shape = RoundedCornerShape(8.dp))
+        )
+    }
+}
+
+@Composable
+fun MovementSwitcher(viewModel: MainViewModel) {
+    val movements = listOf("Squat", "Bicep Flex")
+
+    Row(modifier = Modifier.padding(16.dp)) {
+        movements.forEach { movement ->
+            Button(onClick = { viewModel.switchActiveMovement(movement) }) {
+                Text(movement)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }

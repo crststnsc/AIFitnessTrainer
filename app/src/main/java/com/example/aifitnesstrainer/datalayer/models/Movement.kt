@@ -17,8 +17,13 @@ class Movement(
     private var totalReps = 0
     private var startTime: Long = 0
     private var endTime: Long = 0
+    var onRepComplete: ((Int) -> Unit)? = null // Callback for rep completion
+    var onProgressUpdate: ((Float) -> Unit)? = null // Callback for progress update
 
     fun updateAngles(currentAngles: Map<Int, Int>) {
+        val firstAngle = currentAngles.values.firstOrNull()
+        onProgressUpdate?.invoke(firstAngle?.toFloat() ?: 0f)
+
         val isUp = anglesWithinTolerance(currentAngles, upStateAngles)
         val isDown = anglesWithinTolerance(currentAngles, downStateAngles)
 
@@ -31,13 +36,13 @@ class Movement(
                 }
             }
             isDown -> {
-                if (currentState != State.DOWN) {
+                if (currentState == State.UP) {
                     currentState = State.DOWN
                     correctReps++
+                    onRepComplete?.invoke(correctReps) // Notify rep completion
                     if (correctReps == 1) endTime = System.currentTimeMillis()
                 }
             }
-            else -> currentState = State.NONE
         }
     }
 
@@ -53,8 +58,6 @@ class Movement(
     }
 
     fun getFeedback(): String {
-        Log.e("CorrectReps", correctReps.toString())
-
         val duration = (endTime - startTime) / 1000 // Duration in seconds
         return if (correctReps > 0) {
             "Good job! You completed $correctReps of $name reps in $duration seconds."

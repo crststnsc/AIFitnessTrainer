@@ -1,5 +1,7 @@
 package com.example.aifitnesstrainer.uilayer.viewmodels
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import com.example.aifitnesstrainer.datalayer.ml.KeyPoint
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
@@ -11,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlin.math.acos
 import kotlin.math.sqrt
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _results = MutableStateFlow<List<BoundingBox>>(emptyList())
     val results: StateFlow<List<BoundingBox>> = _results
 
@@ -21,38 +23,44 @@ class MainViewModel : ViewModel() {
     private val _inferenceTime = MutableStateFlow(0L)
     val inferenceTime: StateFlow<Long> = _inferenceTime
 
-    private val movements = mutableListOf<Movement>()
-
     private val _feedback = MutableStateFlow("")
     val feedback: StateFlow<String> = _feedback
 
+    private val _movementProgress = MutableStateFlow(0f)
+    val movementProgress: StateFlow<Float> = _movementProgress
 
-    init {
-        // Define the movements you want to track
-        movements.add(
-            Movement(
-                name = "Squat",
-                upStateAngles = mapOf(
-                    KEYPOINTS.L_KNEE.value to 180,
-                    KEYPOINTS.R_KNEE.value to 180,
-                ),
-                downStateAngles = mapOf(
-                    KEYPOINTS.L_KNEE.value to 90,
-                    KEYPOINTS.R_KNEE.value to 90,
-                ),
-                tolerance = 20
-            )
-//            Movement(
-//                name = "Bicep Flex",
-//                upStateAngles = mapOf(
-//                    KEYPOINTS.R_ELBOW.value to 90
-//                ),
-//                downStateAngles = mapOf(
-//                    KEYPOINTS.R_ELBOW.value to 180
-//                ),
-//                tolerance = 20
-//            )
+    private val movements = listOf(
+        Movement(
+            name = "Squat",
+            upStateAngles = mapOf(
+                KEYPOINTS.L_KNEE.value to 180,
+                KEYPOINTS.R_KNEE.value to 180,
+            ),
+            downStateAngles = mapOf(
+                KEYPOINTS.L_KNEE.value to 90,
+                KEYPOINTS.R_KNEE.value to 90,
+            ),
+            tolerance = 20
+        ),
+        Movement(
+            name = "Bicep Flex",
+            upStateAngles = mapOf(
+                KEYPOINTS.L_ELBOW.value to 90,
+                KEYPOINTS.R_ELBOW.value to 90,
+            ),
+            downStateAngles = mapOf(
+                KEYPOINTS.L_ELBOW.value to 180,
+                KEYPOINTS.R_ELBOW.value to 180,
+            ),
+            tolerance = 30
         )
+    )
+
+    private var activeMovement: Movement? = null
+    private var speakCallback: ((String) -> Unit)? = null
+
+    fun registerSpeakCallback(callback: (String) -> Unit) {
+        speakCallback = callback
     }
 
     fun updateResults(newResults: List<BoundingBox>, inferenceTime: Long) {
@@ -71,40 +79,29 @@ class MainViewModel : ViewModel() {
             }.toMap()
             _jointAngles.value = jointAngles
 
-            // Update movements with the current angles
-            movements.forEach { it.updateAngles(jointAngles) }
-
-            _feedback.value = movements.joinToString("\n") { it.getFeedback() }
-
+            activeMovement?.updateAngles(jointAngles)
+            _feedback.value = activeMovement?.getFeedback() ?: "Please select a movement"
         } else {
             _jointAngles.value = emptyMap()
         }
     }
 
+    fun switchActiveMovement(movementName: String) {
+        activeMovement = movements.find { it.name == movementName }
+        speakCallback?.invoke("Starting $movementName.")
+
+        activeMovement?.onRepComplete = { reps ->
+            speakCallback?.invoke("You have completed $reps reps")
+        }
+
+        activeMovement?.onProgressUpdate = { progress ->
+            val maxAngle = activeMovement?.upStateAngles?.values?.first() ?: 1
+            _movementProgress.value = (progress) / maxAngle
+        }
+    }
+
     fun clearResults() {
         _results.value = emptyList()
-    }
-
-    private fun calculateAngles(bboxes: List<BoundingBox>): List<Pair<Int, Int>> {
-        val results = bboxes
-        val jointAngles = if (results.isNotEmpty()) {
-            Constants.JOINTS_ANGLE_POINTS.map { joint ->
-                val (start, middle, end) = joint.value
-                val angle = getAngle(
-                    results[0].keyPoints[start.value],
-                    results[0].keyPoints[middle.value],
-                    results[0].keyPoints[end.value]
-                )
-                Pair(middle.value, angle)
-            }
-        } else {
-            emptyList()
-        }
-        return jointAngles
-    }
-
-    fun getMovementFeedback(): String {
-        return movements.joinToString("\n") { it.getFeedback() }
     }
 
     private fun getAngle(
