@@ -5,24 +5,19 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import com.example.aifitnesstrainer.datalayer.ml.KeyPoint
 
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
-import com.example.aifitnesstrainer.datalayer.models.Constants
-import kotlin.math.acos
-import kotlin.math.sqrt
 
 class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     private var results = listOf<BoundingBox>()
-    private var jointAngles = listOf<Pair<Int, Int>>()
+    private var jointAngles = emptyMap<Int, Int>()
     private var boxPaint = Paint()
     private var textBackgroundPaint = Paint()
     private var textPaint = Paint()
@@ -45,7 +40,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         boxPaint.style = Paint.Style.STROKE
     }
 
-    private val KEYPOINT_RADIUS = 10.0f // Adjust the size as needed
+    private val radius = 10.0f // Adjust the size as needed
     private val keypointPaint = Paint().apply {
         color = Color.WHITE // Set your desired color
         style = Paint.Style.STROKE
@@ -65,17 +60,17 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
-        // Pre-compute scaled keypoints and joint angles
+        // Pre-compute scaled key points and joint angles
         val scaledKeyPoints = results.map { boundingBox ->
             boundingBox.keyPoints.map { keypoint ->
                 Pair(keypoint.x * width, keypoint.y * height)
             }
         }
 
-        // Draw keypoints
+        // Draw key points
         scaledKeyPoints.forEach { boundingBox ->
             boundingBox.forEach { (keypointX, keypointY) ->
-                canvas.drawCircle(keypointX, keypointY, KEYPOINT_RADIUS, keypointPaint)
+                canvas.drawCircle(keypointX, keypointY, radius, keypointPaint)
             }
         }
 
@@ -95,7 +90,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         }
     }
 
-    fun setResults(boundingBoxes: List<BoundingBox>, jointAngles: List<Pair<Int, Int>>) {
+    fun setResults(boundingBoxes: List<BoundingBox>, jointAngles: Map<Int, Int>) {
         results = boundingBoxes
         this.jointAngles = jointAngles
         postInvalidate()
@@ -104,7 +99,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 }
 
 @Composable
-fun OverlayViewComposable(results: List<BoundingBox>, jointAngles: List<Pair<Int, Int>>) {
+fun OverlayViewComposable(results: List<BoundingBox>, jointAngles: Map<Int, Int>) {
     AndroidView(
         modifier = Modifier.aspectRatio(3f/4f).fillMaxSize(),
         factory = { context ->

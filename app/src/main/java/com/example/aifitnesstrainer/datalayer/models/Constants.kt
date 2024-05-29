@@ -1,22 +1,22 @@
 package com.example.aifitnesstrainer.datalayer.models
 
 enum class KEYPOINTS(val value: Int) {
-    R_ANKLE(5),
-    R_KNEE(4),
-    R_HIP(3),
-    L_HIP(2),
-    L_KNEE(1),
-    L_ANKLE(0),
+    R_ANKLE(0),
+    R_KNEE(1),
+    R_HIP(2),
+    L_HIP(3),
+    L_KNEE(4),
+    L_ANKLE(5),
     PELVIS(6),
     THORAX(7),
     UPPER_NECK(8),
     HEAD_TOP(9),
-    R_WRIST(15),
-    R_ELBOW(14),
-    R_SHOULDER(13),
-    L_SHOULDER(12),
-    L_ELBOW(11),
-    L_WRIST(10)
+    R_WRIST(10),
+    R_ELBOW(11),
+    R_SHOULDER(12),
+    L_SHOULDER(13),
+    L_ELBOW(14),
+    L_WRIST(15)
 }
 
 object Constants {

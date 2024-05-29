@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
@@ -70,6 +71,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener {
                         )
                         InferenceTimeView(inferenceTime = inferenceTime)
                         OverlayViewComposable(results = results, jointAngles = jointAngles)
+                        FeedbackView(viewModel = viewModel)
                     }
 
                 }
@@ -101,6 +103,18 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener {
 }
 
 @Composable
+fun FeedbackView(viewModel: MainViewModel) {
+    val feedback by viewModel.feedback.collectAsState()
+
+    Text(
+        text = feedback,
+        modifier = Modifier.padding(16.dp),
+        color = Color.Black,
+        fontSize = 20.sp
+    )
+}
+
+@Composable
 fun CameraPreview(
     isFrontCamera: Boolean,
     switchCamera: () -> Unit,
@@ -118,7 +132,9 @@ fun CameraPreview(
     }
 
     if (hasCameraPermission) {
-        Box(modifier = Modifier.aspectRatio(3f/4f).fillMaxSize()) {
+        Box(modifier = Modifier
+            .aspectRatio(3f / 4f)
+            .fillMaxSize()) {
             CameraView(
                 isFrontCamera = isFrontCamera,
                 lifecycleOwner = lifecycleOwner,
