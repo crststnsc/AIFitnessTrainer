@@ -53,7 +53,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 KEYPOINTS.R_ELBOW.value to 180,
             ),
             tolerance = 30
-        )
+        ),
+        Movement(
+            name = "Shoulder Press",
+            upStateAngles = mapOf(
+                KEYPOINTS.L_ELBOW.value to 180,
+                KEYPOINTS.R_ELBOW.value to 180,
+            ),
+            downStateAngles = mapOf(
+                KEYPOINTS.L_ELBOW.value to 90,
+                KEYPOINTS.R_ELBOW.value to 90,
+            ),
+            tolerance = 30
+        ),
     )
 
     private var activeMovement: Movement? = null
@@ -98,6 +110,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val maxAngle = activeMovement?.upStateAngles?.values?.first() ?: 1
             _movementProgress.value = (progress) / maxAngle
         }
+    }
+
+    fun getMovementNames(): List<String> {
+        return movements.map { it.name }
     }
 
     fun clearResults() {

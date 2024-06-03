@@ -98,15 +98,3 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 
 }
 
-@Composable
-fun OverlayViewComposable(results: List<BoundingBox>, jointAngles: Map<Int, Int>) {
-    AndroidView(
-        modifier = Modifier.aspectRatio(3f/4f).fillMaxSize(),
-        factory = { context ->
-            OverlayView(context, null)
-        },
-        update = { view ->
-            view.setResults(results, jointAngles)
-        }
-    )
-}
