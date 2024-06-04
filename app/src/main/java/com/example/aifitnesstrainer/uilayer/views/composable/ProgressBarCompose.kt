@@ -18,13 +18,13 @@ fun MovementProgressBar(progress: Float) {
         modifier = Modifier
             .fillMaxWidth()
             .height(30.dp)
-            .background(Color.Gray, shape = RoundedCornerShape(8.dp))
+            .background(Color.DarkGray, shape = RoundedCornerShape(8.dp)),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth(progress)
-                .background(Color.Green, shape = RoundedCornerShape(8.dp))
+                .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
         )
     }
 }

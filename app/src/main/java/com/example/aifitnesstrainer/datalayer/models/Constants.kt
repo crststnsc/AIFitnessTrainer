@@ -22,6 +22,25 @@ enum class KEYPOINTS(val value: Int) {
 object Constants {
     val MODELS = arrayOf("yolov8n-pose-custom.tflite", "yolov8s-pose-custom.tflite")
 
+    val JOINTS_TO_INDEX_MAP = mapOf(
+        "right ankle" to KEYPOINTS.R_ANKLE,
+        "right knee" to KEYPOINTS.R_KNEE,
+        "right hip" to KEYPOINTS.R_HIP,
+        "left hip" to KEYPOINTS.L_HIP,
+        "left knee" to KEYPOINTS.L_KNEE,
+        "left ankle" to KEYPOINTS.L_ANKLE,
+        "pelvis" to KEYPOINTS.PELVIS,
+        "thorax" to KEYPOINTS.THORAX,
+        "upper neck" to KEYPOINTS.UPPER_NECK,
+        "head top" to KEYPOINTS.HEAD_TOP,
+        "right wrist" to KEYPOINTS.R_WRIST,
+        "right elbow" to KEYPOINTS.R_ELBOW,
+        "right shoulder" to KEYPOINTS.R_SHOULDER,
+        "left shoulder" to KEYPOINTS.L_SHOULDER,
+        "left elbow" to KEYPOINTS.L_ELBOW,
+        "left wrist" to KEYPOINTS.L_WRIST
+    )
+
     val JOINTS_ANGLE_POINTS = hashMapOf(
         "right_elbow" to Triple(KEYPOINTS.R_WRIST, KEYPOINTS.R_ELBOW, KEYPOINTS.R_SHOULDER),
         "left_elbow" to Triple(KEYPOINTS.L_WRIST, KEYPOINTS.L_ELBOW, KEYPOINTS.L_SHOULDER),

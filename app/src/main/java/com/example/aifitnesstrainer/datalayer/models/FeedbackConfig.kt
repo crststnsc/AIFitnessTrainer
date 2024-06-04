@@ -45,6 +45,12 @@ object FeedbackConfig {
             "Your %s should go lower during the descent.",
             "Drop your %s a bit as you go down.",
             "Lower your %s slightly while descending."
+        ),
+        "good_form" to listOf(
+            "Good form! Keep it up!",
+            "Great job!",
+            "You're doing great!",
+            ""
         )
     )
 }

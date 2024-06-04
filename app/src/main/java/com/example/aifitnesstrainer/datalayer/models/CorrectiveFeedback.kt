@@ -40,7 +40,7 @@ class CorrectiveFeedback {
         }
 
         lastFeedbackTime = currentTime
-        return "Good form! Keep it up!"
+        return feedbackPhrases["good_form"]?.random() ?: ""
     }
 
     private fun provideFeedback(joint: String, correction: String): String {

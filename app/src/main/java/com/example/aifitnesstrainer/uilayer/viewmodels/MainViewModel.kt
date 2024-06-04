@@ -2,7 +2,6 @@ package com.example.aifitnesstrainer.uilayer.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import com.example.aifitnesstrainer.datalayer.ml.KeyPoint
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
 import com.example.aifitnesstrainer.datalayer.models.Constants
@@ -32,48 +31,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val correctiveFeedbackAnalyzer = CorrectiveFeedback()
 
-    private val movements = listOf(
-        Movement(
-            name = "Squat",
-            upStateAngles = mapOf(
-                KEYPOINTS.L_KNEE.value to 180,
-                KEYPOINTS.R_KNEE.value to 180,
-                KEYPOINTS.L_HIP.value to 180,
-                KEYPOINTS.R_HIP.value to 180,
-            ),
-            downStateAngles = mapOf(
-                KEYPOINTS.L_KNEE.value to 90,
-                KEYPOINTS.R_KNEE.value to 90,
-                KEYPOINTS.L_HIP.value to 90,
-                KEYPOINTS.R_HIP.value to 90,
-            ),
-            tolerance = 20
-        ),
-        Movement(
-            name = "Bicep Flex",
-            upStateAngles = mapOf(
-                KEYPOINTS.L_ELBOW.value to 90,
-                KEYPOINTS.R_ELBOW.value to 90,
-            ),
-            downStateAngles = mapOf(
-                KEYPOINTS.L_ELBOW.value to 180,
-                KEYPOINTS.R_ELBOW.value to 180,
-            ),
-            tolerance = 30
-        ),
-        Movement(
-            name = "Shoulder Press",
-            upStateAngles = mapOf(
-                KEYPOINTS.L_ELBOW.value to 180,
-                KEYPOINTS.R_ELBOW.value to 180,
-            ),
-            downStateAngles = mapOf(
-                KEYPOINTS.L_ELBOW.value to 90,
-                KEYPOINTS.R_ELBOW.value to 90,
-            ),
-            tolerance = 30
-        ),
-    )
+    private val _movements = MutableStateFlow(MainViewModelConfig.movements)
+    val movements: StateFlow<List<Movement>> = _movements
 
     private var activeMovement: Movement? = null
     private var speakCallback: ((String) -> Unit)? = null
@@ -106,7 +65,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun switchActiveMovement(movementName: String) {
-        activeMovement = movements.find { it.name == movementName }
+        activeMovement = _movements.value.find { it.name == movementName }
         speakCallback?.invoke("Starting $movementName.")
 
         activeMovement?.onRepComplete = { reps ->
@@ -124,7 +83,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getMovementNames(): List<String> {
-        return movements.map { it.name }
+        return _movements.value.map { it.name }
     }
 
     fun clearResults() {
