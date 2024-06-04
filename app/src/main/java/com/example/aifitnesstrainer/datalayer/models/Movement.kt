@@ -17,8 +17,8 @@ class Movement(
     private var totalReps = 0
     private var startTime: Long = 0
     private var endTime: Long = 0
-    var onRepComplete: ((Int) -> Unit)? = null // Callback for rep completion
-    var onProgressUpdate: ((Float) -> Unit)? = null // Callback for progress update
+    var onRepComplete: ((Int) -> Unit)? = null
+    var onProgressUpdate: ((Float) -> Unit)? = null
 
     fun updateAngles(currentAngles: Map<Int, Int>) {
         val firstAngle = currentAngles.values.firstOrNull()
@@ -29,17 +29,16 @@ class Movement(
 
         when {
             isUp -> {
-                if (currentState != State.UP) {
-                    currentState = State.UP
-                    totalReps++
+                if (currentState == State.DOWN) {
+                    correctReps++
+                    onRepComplete?.invoke(correctReps)
                     if (totalReps == 1) startTime = System.currentTimeMillis()
                 }
+                currentState = State.UP
             }
             isDown -> {
                 if (currentState == State.UP) {
                     currentState = State.DOWN
-                    correctReps++
-                    onRepComplete?.invoke(correctReps) // Notify rep completion
                     if (correctReps == 1) endTime = System.currentTimeMillis()
                 }
             }
@@ -60,7 +59,7 @@ class Movement(
     fun getFeedback(): String {
         val duration = (endTime - startTime) / 1000 // Duration in seconds
         return if (correctReps > 0) {
-            "Good job! You completed $correctReps of $name reps in $duration seconds."
+            "$correctReps/$totalReps"
         } else {
             "Keep going! Try to reach the correct form."
         }
