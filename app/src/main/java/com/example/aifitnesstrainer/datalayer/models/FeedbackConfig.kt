@@ -4,6 +4,7 @@ object FeedbackConfig {
     val feedbackTargetJoints = mapOf(
         "Squat" to KEYPOINTS.R_HIP.value,
         "Bicep Flex" to KEYPOINTS.L_WRIST.value,
+        "Shoulder Press" to KEYPOINTS.L_ELBOW.value
     )
 
     val indexToKeyPointMap = mapOf(

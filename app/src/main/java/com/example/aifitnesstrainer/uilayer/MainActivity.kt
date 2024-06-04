@@ -5,10 +5,21 @@ import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
 import com.example.aifitnesstrainer.datalayer.models.Constants
 import com.example.aifitnesstrainer.uilayer.viewmodels.MainViewModel
@@ -63,6 +74,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
                             InferenceTimeView(inferenceTime = inferenceTime)
                             OverlayViewComposable(results = results, jointAngles = jointAngles)
                             FeedbackView(viewModel = viewModel)
+                            MovementStatusView(viewModel = viewModel)
                         }
                         MovementProgressBar(progress = movementProgress)
                         MovementSwitcher(viewModel)
@@ -106,6 +118,31 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
         textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 }
+
+@Composable
+fun MovementStatusView(viewModel: MainViewModel) {
+    val movementStatus by viewModel.movementStatus.collectAsState()
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Text(
+            text = movementStatus,
+            color = Color.Black,
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Serif,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .background(Color.White.copy(alpha = 0.8f))
+                .padding(8.dp)
+                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                .shadow(4.dp, shape = RoundedCornerShape(8.dp))
+        )
+    }
+}
+
 
 
 

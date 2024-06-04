@@ -18,10 +18,22 @@ class Movement(
     var onRepComplete: ((Int) -> Unit)? = null
     var onProgressUpdate: ((Float) -> Unit)? = null
     var onCorrectiveFeedback: ((String) -> Unit)? = null
+    var onMovementStatusChange: ((String) -> Unit)? = null
+
+    private var isMoving = false
 
     fun updateAngles(currentAngles: Map<Int, Int>, correctiveFeedback: CorrectiveFeedback) {
         val isUp = anglesWithinTolerance(currentAngles, upStateAngles)
         val isDown = anglesWithinTolerance(currentAngles, downStateAngles)
+
+        val isSignificantlyMoving = correctiveFeedback.isSignificantlyMoving(currentAngles, this)
+        if (isSignificantlyMoving && !isMoving) {
+            isMoving = true
+            onMovementStatusChange?.invoke("moving")
+        } else if (!isSignificantlyMoving && isMoving) {
+            isMoving = false
+            onMovementStatusChange?.invoke("not moving")
+        }
 
         when {
             isUp -> {

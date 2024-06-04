@@ -37,6 +37,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var activeMovement: Movement? = null
     private var speakCallback: ((String) -> Unit)? = null
 
+    private val _movementStatus = MutableStateFlow("not moving")
+    val movementStatus: StateFlow<String> = _movementStatus
+
+    private fun updateMovementStatus(status: String) {
+        _movementStatus.value = status
+    }
+
     fun registerSpeakCallback(callback: (String) -> Unit) {
         speakCallback = callback
     }
@@ -79,6 +86,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         activeMovement?.onCorrectiveFeedback = { feedback ->
             speakCallback?.invoke(feedback)
+        }
+
+        activeMovement?.onMovementStatusChange = { status ->
+            updateMovementStatus(status)
         }
     }
 

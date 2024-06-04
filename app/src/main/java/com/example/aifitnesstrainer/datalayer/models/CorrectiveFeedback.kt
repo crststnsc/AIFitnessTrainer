@@ -1,13 +1,17 @@
 package com.example.aifitnesstrainer.datalayer.models
 
+import androidx.compose.runtime.currentCompositionErrors
+
 
 class CorrectiveFeedback {
     private val feedbackTargetJoints = FeedbackConfig.feedbackTargetJoints
     private val indexToKeyPointMap = FeedbackConfig.indexToKeyPointMap
     private val feedbackPhrases = FeedbackConfig.feedbackPhrases
-    private val cooldownTime = 6000L
+    private val cooldownTime = 8000L
+    private val movementThreshold = 10
 
     private var lastFeedbackTime = System.currentTimeMillis()
+    private var lastAngles: Map<Int, Int>? = null
 
     fun analyzeAngles(currentAngles: Map<Int, Int>, movement: Movement): String {
         val currentTime = System.currentTimeMillis()
@@ -15,7 +19,13 @@ class CorrectiveFeedback {
             return ""
         }
 
+        if (isSignificantlyMoving(currentAngles, movement)) {
+            lastAngles = currentAngles
+            return ""
+        }
+
         lastFeedbackTime = currentTime
+        lastAngles = currentAngles
 
         val targetJoint = feedbackTargetJoints[movement.name] ?: return ""
 
@@ -41,6 +51,20 @@ class CorrectiveFeedback {
 
         lastFeedbackTime = currentTime
         return feedbackPhrases["good_form"]?.random() ?: ""
+    }
+
+    fun isSignificantlyMoving(currentAngles: Map<Int, Int>, movement: Movement): Boolean {
+        val previousAngles = lastAngles ?: return false
+        val relevantJoints = movement.upStateAngles.keys
+
+        for (joint in relevantJoints) {
+            val currentAngle = currentAngles[joint] ?: continue
+            val previousAngle = previousAngles[joint] ?: continue
+            if (kotlin.math.abs(currentAngle - previousAngle) > movementThreshold) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun provideFeedback(joint: String, correction: String): String {
