@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.example.aifitnesstrainer.datalayer.ml.KeyPoint
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
 import com.example.aifitnesstrainer.datalayer.models.Constants
+import com.example.aifitnesstrainer.datalayer.models.CorrectiveFeedback
 import com.example.aifitnesstrainer.datalayer.models.KEYPOINTS
 import com.example.aifitnesstrainer.datalayer.models.Movement
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,16 +30,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _movementProgress = MutableStateFlow(0f)
     val movementProgress: StateFlow<Float> = _movementProgress
 
+    private val correctiveFeedbackAnalyzer = CorrectiveFeedback()
+
     private val movements = listOf(
         Movement(
             name = "Squat",
             upStateAngles = mapOf(
                 KEYPOINTS.L_KNEE.value to 180,
                 KEYPOINTS.R_KNEE.value to 180,
+                KEYPOINTS.L_HIP.value to 180,
+                KEYPOINTS.R_HIP.value to 180,
             ),
             downStateAngles = mapOf(
                 KEYPOINTS.L_KNEE.value to 90,
                 KEYPOINTS.R_KNEE.value to 90,
+                KEYPOINTS.L_HIP.value to 90,
+                KEYPOINTS.R_HIP.value to 90,
             ),
             tolerance = 20
         ),
@@ -91,7 +98,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }.toMap()
             _jointAngles.value = jointAngles
 
-            activeMovement?.updateAngles(jointAngles)
+            activeMovement?.updateAngles(jointAngles, correctiveFeedbackAnalyzer)
             _feedback.value = activeMovement?.getFeedback() ?: "Please select a movement"
         } else {
             _jointAngles.value = emptyMap()
@@ -109,6 +116,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         activeMovement?.onProgressUpdate = { progress ->
             val maxAngle = activeMovement?.upStateAngles?.values?.first() ?: 1
             _movementProgress.value = (progress) / maxAngle
+        }
+
+        activeMovement?.onCorrectiveFeedback = { feedback ->
+            speakCallback?.invoke(feedback)
         }
     }
 

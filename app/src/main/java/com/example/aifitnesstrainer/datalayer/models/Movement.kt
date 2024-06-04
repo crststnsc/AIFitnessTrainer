@@ -12,15 +12,14 @@ class Movement(
         UP, DOWN, NONE
     }
 
-    private var currentState = State.NONE
+    var currentState = State.NONE
     private var correctReps = 0
     private var totalReps = 0
-    private var startTime: Long = 0
-    private var endTime: Long = 0
     var onRepComplete: ((Int) -> Unit)? = null
     var onProgressUpdate: ((Float) -> Unit)? = null
+    var onCorrectiveFeedback: ((String) -> Unit)? = null
 
-    fun updateAngles(currentAngles: Map<Int, Int>) {
+    fun updateAngles(currentAngles: Map<Int, Int>, correctiveFeedback: CorrectiveFeedback) {
         val firstAngle = currentAngles.values.firstOrNull()
         onProgressUpdate?.invoke(firstAngle?.toFloat() ?: 0f)
 
@@ -31,17 +30,18 @@ class Movement(
             isUp -> {
                 if (currentState == State.DOWN) {
                     correctReps++
-                    onRepComplete?.invoke(correctReps)
-                    if (totalReps == 1) startTime = System.currentTimeMillis()
                 }
                 currentState = State.UP
             }
             isDown -> {
                 if (currentState == State.UP) {
                     currentState = State.DOWN
-                    if (correctReps == 1) endTime = System.currentTimeMillis()
                 }
             }
+        }
+        val feedback = correctiveFeedback.analyzeAngles(currentAngles, this)
+        if (feedback.isNotEmpty()) {
+            onCorrectiveFeedback?.invoke(feedback)
         }
     }
 
@@ -57,11 +57,10 @@ class Movement(
     }
 
     fun getFeedback(): String {
-        val duration = (endTime - startTime) / 1000 // Duration in seconds
         return if (correctReps > 0) {
             "$correctReps/$totalReps"
         } else {
-            "Keep going! Try to reach the correct form."
+            "Start moving to begin counting the reps!"
         }
     }
 }

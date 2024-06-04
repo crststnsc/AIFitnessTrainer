@@ -13,12 +13,16 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.sharp.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -30,12 +34,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.example.aifitnesstrainer.R
 import com.example.aifitnesstrainer.datalayer.ml.Detector
 import java.util.concurrent.ExecutorService
 
@@ -72,10 +79,13 @@ fun CameraPreview(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(16.dp)
+                    .size(32.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Switch Camera"
+                    painter = painterResource(id = R.drawable.outline_cameraswitch_24),
+                    contentDescription = "Switch Camera",
+                    tint = Color.Black,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
