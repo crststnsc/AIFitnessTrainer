@@ -1,14 +1,14 @@
 package com.example.aifitnesstrainer.datalayer.models
 
-import androidx.compose.runtime.currentCompositionErrors
+import kotlin.math.pow
 
 
 class CorrectiveFeedback {
     private val feedbackTargetJoints = FeedbackConfig.feedbackTargetJoints
     private val indexToKeyPointMap = FeedbackConfig.indexToKeyPointMap
     private val feedbackPhrases = FeedbackConfig.feedbackPhrases
-    private val cooldownTime = 8000L
-    private val movementThreshold = 10
+    private val cooldownTime = 6000L
+    private val movementThreshold = 15
 
     private var lastFeedbackTime = System.currentTimeMillis()
     private var lastAngles: Map<Int, Int>? = null
@@ -29,7 +29,8 @@ class CorrectiveFeedback {
 
         val targetJoint = feedbackTargetJoints[movement.name] ?: return ""
 
-        val stateAngles = if (movement.currentState == Movement.State.UP) {
+        val state = checkNearestState(currentAngles, movement.upStateAngles, movement.downStateAngles)
+        val stateAngles = if (state == Movement.State.UP) {
             movement.upStateAngles
         } else {
             movement.downStateAngles
@@ -40,9 +41,9 @@ class CorrectiveFeedback {
 
             if (kotlin.math.abs(currentAngle - expectedAngle) > movement.tolerance) {
                 val correction = if (currentAngle < expectedAngle) {
-                    if (movement.currentState == Movement.State.UP) "higher_up" else "higher_down"
+                    if (state == Movement.State.UP) "higher_up" else "higher_down"
                 } else {
-                    if (movement.currentState == Movement.State.UP) "lower_up" else "lower_down"
+                    if (state == Movement.State.UP) "lower_up" else "lower_down"
                 }
                 lastFeedbackTime = currentTime
                 return provideFeedback(indexToKeyPointMap[targetJoint] ?: "joint", correction)
@@ -65,6 +66,33 @@ class CorrectiveFeedback {
             }
         }
         return false
+    }
+
+    private fun checkNearestState(
+        currentAngles: Map<Int, Int>,
+        upAngles: Map<Int, Int>,
+        downAngles: Map<Int, Int>
+    ): Movement.State{
+        val upDistance = calculateDistance(currentAngles, upAngles)
+        val downDistance = calculateDistance(currentAngles, downAngles)
+
+        if (upDistance < downDistance) {
+            return Movement.State.UP
+        }
+
+        return Movement.State.DOWN
+    }
+
+    private fun calculateDistance(
+        currentAngles: Map<Int, Int>,
+        targetAngles: Map<Int, Int>
+    ): Double {
+        var distance = 0.0
+        for ((joint, targetAngle) in targetAngles) {
+            val currentAngle = currentAngles[joint] ?: continue
+            distance += kotlin.math.abs(currentAngle - targetAngle).toDouble().pow(2)
+        }
+        return kotlin.math.sqrt(distance)
     }
 
     private fun provideFeedback(joint: String, correction: String): String {

@@ -13,7 +13,7 @@ class Movement(
         UP, DOWN, NONE
     }
 
-    var currentState = State.NONE
+    private var currentState = State.NONE
     private var correctReps = 0
     var onRepComplete: ((Int) -> Unit)? = null
     var onProgressUpdate: ((Float) -> Unit)? = null

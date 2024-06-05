@@ -67,7 +67,6 @@ class Detector(
         tensorWidth = inputShape[1]
         tensorHeight = inputShape[2]
 
-        // If in case input shape is in format of [1, 3, ..., ...]
         if (inputShape[1] == 3) {
             tensorWidth = inputShape[2]
             tensorHeight = inputShape[3]
@@ -212,19 +211,15 @@ class Detector(
     private fun createPaddedBitmap(originalBitmap: Bitmap, targetWidth: Int, targetHeight: Int): Bitmap {
         val (newWidth, newHeight) = getScaledDimensions(originalBitmap.width, originalBitmap.height, targetWidth, targetHeight)
 
-        // Create a new bitmap with the target dimensions
         val paddedBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(paddedBitmap)
-        val paint = Paint().apply { color = Color.BLACK } // Change the padding color as needed
+        val paint = Paint().apply { color = Color.BLACK }
 
-        // Draw the padding
         canvas.drawRect(0f, 0f, targetWidth.toFloat(), targetHeight.toFloat(), paint)
 
-        // Calculate the top and left position to center the scaled bitmap
         val left = (targetWidth - newWidth) / 2f
         val top = (targetHeight - newHeight) / 2f
 
-        // Draw the scaled bitmap onto the canvas
         val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true)
         canvas.drawBitmap(scaledBitmap, left, top, null)
 

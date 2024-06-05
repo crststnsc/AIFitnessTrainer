@@ -2,6 +2,8 @@ package com.example.aifitnesstrainer.uilayer
 
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
+import android.speech.tts.Voice
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -18,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
@@ -34,6 +37,8 @@ import com.example.aifitnesstrainer.uilayer.views.composable.OverlayViewComposab
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.concurrent.thread
+import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeech.OnInitListener {
     private var isFrontCamera by mutableStateOf(true)
@@ -62,6 +67,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
                     val inferenceTime by viewModel.inferenceTime.collectAsState()
                     val jointAngles by viewModel.jointAngles.collectAsState()
                     val movementProgress by viewModel.movementProgress.collectAsState()
+                    val feedback by viewModel.feedback.collectAsState()
 
                     Column(modifier=Modifier.fillMaxSize()) {
                         Box(modifier = Modifier.weight(1f)) {
@@ -73,7 +79,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
                             )
                             InferenceTimeView(inferenceTime = inferenceTime)
                             OverlayViewComposable(results = results, jointAngles = jointAngles)
-                            FeedbackView(viewModel = viewModel)
+                            FeedbackView(feedback = feedback)
                             MovementStatusView(viewModel = viewModel)
                         }
                         MovementProgressBar(progress = movementProgress)
@@ -103,13 +109,13 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
     }
 
     override fun onEmptyDetect() {
-        runOnUiThread {
+        thread {
             viewModel.clearResults()
         }
     }
 
     override fun onDetect(boundingBoxes: List<BoundingBox>, inferenceTime: Long) {
-        runOnUiThread {
+        thread {
             viewModel.updateResults(boundingBoxes, inferenceTime)
         }
     }

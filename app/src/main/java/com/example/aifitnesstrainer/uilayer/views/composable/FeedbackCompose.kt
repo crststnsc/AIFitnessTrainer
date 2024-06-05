@@ -24,8 +24,7 @@ import com.example.aifitnesstrainer.uilayer.viewmodels.MainViewModel
 
 
 @Composable
-fun FeedbackView(viewModel: MainViewModel) {
-    val feedback by viewModel.feedback.collectAsState()
+fun FeedbackView(feedback: String) {
 
     Box(
         modifier = Modifier

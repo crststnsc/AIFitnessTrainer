@@ -40,9 +40,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         boxPaint.style = Paint.Style.STROKE
     }
 
-    private val radius = 10.0f // Adjust the size as needed
+    private val radius = 10.0f
     private val keypointPaint = Paint().apply {
-        color = Color.WHITE // Set your desired color
+        color = Color.WHITE
         style = Paint.Style.STROKE
         strokeWidth = 10f
     }
@@ -60,21 +60,18 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
-        // Pre-compute scaled key points and joint angles
         val scaledKeyPoints = results.map { boundingBox ->
             boundingBox.keyPoints.map { keypoint ->
                 Pair(keypoint.x * width, keypoint.y * height)
             }
         }
 
-        // Draw key points
         scaledKeyPoints.forEach { boundingBox ->
             boundingBox.forEach { (keypointX, keypointY) ->
                 canvas.drawCircle(keypointX, keypointY, radius, keypointPaint)
             }
         }
 
-        // Draw edges and joint angles
         if (results.isNotEmpty()) {
             val boundingBox = scaledKeyPoints[0]
             edges.forEach { edge ->
