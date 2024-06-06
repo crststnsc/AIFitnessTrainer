@@ -49,6 +49,8 @@ android {
     }
 }
 
+
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -79,4 +81,9 @@ dependencies {
     implementation(libs.tensorflow.lite.api)
     implementation(libs.tensorflow.lite.gpu)
 
+    implementation("com.aallam.openai:openai-client:3.7.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0-RC")
+
+    val ktor_version = "2.3.11"
+    implementation("io.ktor:ktor-client-android:$ktor_version")
 }

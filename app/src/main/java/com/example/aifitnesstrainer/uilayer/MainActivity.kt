@@ -1,9 +1,13 @@
 package com.example.aifitnesstrainer.uilayer
 
+import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioTrack
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -23,6 +27,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
+import com.aallam.openai.api.audio.SpeechRequest
+import com.aallam.openai.api.http.Timeout
+import com.aallam.openai.api.model.ModelId
+import com.aallam.openai.client.OpenAI
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
 import com.example.aifitnesstrainer.datalayer.models.Constants
 import com.example.aifitnesstrainer.uilayer.viewmodels.MainViewModel
@@ -34,11 +43,15 @@ import com.example.aifitnesstrainer.uilayer.views.composable.InferenceTimeView
 import com.example.aifitnesstrainer.uilayer.views.composable.MovementProgressBar
 import com.example.aifitnesstrainer.uilayer.views.composable.MovementSwitcher
 import com.example.aifitnesstrainer.uilayer.views.composable.OverlayViewComposable
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.nio.ByteBuffer
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 import kotlin.reflect.typeOf
+import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeech.OnInitListener {
     private var isFrontCamera by mutableStateOf(true)
@@ -47,14 +60,36 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
 
     private val viewModel: MainViewModel by viewModels()
     private lateinit var textToSpeech: TextToSpeech
+    private lateinit var openai: OpenAI
+    private var useOpenAI = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
         textToSpeech = TextToSpeech(this, this)
 
+        val token = System.getenv("OPENAI_API_KEY")
+
+        if (token != null) {
+            openai = OpenAI(
+                token = token,
+                timeout = Timeout(socket = 5.seconds),
+            )
+        }
+        else{
+            Toast.makeText(this, "API Key expired on non-existent", Toast.LENGTH_LONG).show()
+            useOpenAI = false
+        }
+
         viewModel.registerSpeakCallback { text ->
-            speak(text)
+            lifecycleScope.launch {
+                try {
+                    speak(text)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Log.e("LIFECYCLE OPENAI", e.toString())
+                }
+            }
         }
 
         setContent {
@@ -120,9 +155,28 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
         }
     }
 
-    private fun speak(text: String) {
-        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+    private suspend fun speak(text: String) {
+        try {
+            val rawAudio = openai.speech(
+                request = SpeechRequest(
+                    model = ModelId("tts-1"),
+                    input = text,
+                    voice = com.aallam.openai.api.audio.Voice.Alloy,
+                )
+            )
+
+            val audioTrack = AudioTrack.Builder()
+                .setBufferSizeInBytes(rawAudio.size)
+                .build()
+
+            audioTrack.write(rawAudio, 0, rawAudio.size)
+
+            audioTrack.play()
+        } catch (e: Exception) {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+        }
     }
+
 }
 
 @Composable

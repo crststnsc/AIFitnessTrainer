@@ -69,6 +69,14 @@ fun MovementSwitcher(
     }
 }
 
+@Preview
+@Composable
+fun NewMoveDialog(
+){
+    NewMovementDialog {
+
+    }
+}
 
 @Composable
 fun NewMovementDialog(
@@ -84,8 +92,7 @@ fun NewMovementDialog(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                OutlinedTextField(
-                    value = name,
+                OutlinedTextField(value = name,
                     onValueChange = { name = it },
                     label = { Text("Name") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
@@ -99,7 +106,11 @@ fun NewMovementDialog(
                     }
 
                     var value by remember { mutableStateOf("0") }
-                    OutlinedTextField(value = value, onValueChange = {s: String -> value = s })
+                    OutlinedTextField(
+                        value = value,
+                        onValueChange = {s: String -> value = s },
+                        modifier = Modifier.wrapContentSize()
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

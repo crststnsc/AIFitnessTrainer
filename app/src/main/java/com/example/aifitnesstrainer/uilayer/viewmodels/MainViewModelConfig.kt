@@ -34,14 +34,14 @@ object MainViewModelConfig{
         Movement(
             name = "Shoulder Press",
             upStateAngles = mapOf(
-                KEYPOINTS.L_ELBOW.value to 180,
-                KEYPOINTS.R_ELBOW.value to 180,
+                KEYPOINTS.L_ELBOW.value to 130,
+                KEYPOINTS.R_ELBOW.value to 130,
             ),
             downStateAngles = mapOf(
                 KEYPOINTS.L_ELBOW.value to 90,
                 KEYPOINTS.R_ELBOW.value to 90,
             ),
-            tolerance = 30,
+            tolerance = 20,
             totalReps = 10
         ),
     )

@@ -25,11 +25,12 @@ class CorrectiveFeedback {
         }
 
         lastFeedbackTime = currentTime
-        lastAngles = currentAngles
 
         val targetJoint = feedbackTargetJoints[movement.name] ?: return ""
+        val state = checkMovementDirection(currentAngles, movement)
 
-        val state = checkNearestState(currentAngles, movement.upStateAngles, movement.downStateAngles)
+        lastAngles = currentAngles
+
         val stateAngles = if (state == Movement.State.UP) {
             movement.upStateAngles
         } else {
@@ -82,6 +83,21 @@ class CorrectiveFeedback {
 
         return Movement.State.DOWN
     }
+
+    private fun checkMovementDirection(
+        currentAngles: Map<Int, Int>,
+        movement: Movement
+    ): Movement.State {
+        for ((key, _) in movement.upStateAngles) {
+            val currentAngle = currentAngles[key] ?: return Movement.State.NONE
+            val previousAngle = lastAngles?.get(key) ?: return Movement.State.NONE
+
+            if(currentAngle > previousAngle) return Movement.State.UP
+        }
+
+        return Movement.State.DOWN
+    }
+
 
     private fun calculateDistance(
         currentAngles: Map<Int, Int>,
