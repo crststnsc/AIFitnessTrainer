@@ -86,4 +86,10 @@ dependencies {
 
     val ktor_version = "2.3.11"
     implementation("io.ktor:ktor-client-android:$ktor_version")
+
+    implementation ("com.google.android.exoplayer:exoplayer-core:2.14.2")
+    implementation ("com.google.android.exoplayer:exoplayer-ui:2.14.2")
+    implementation ("com.google.android.exoplayer:exoplayer-extractor:2.14.2")
+
+
 }
