@@ -7,7 +7,6 @@ class Movement(
     val upStateAngles: Map<Int, Int>,
     val downStateAngles: Map<Int, Int>,
     val tolerance: Int = 10,
-    val totalReps: Int = 10
 ) {
     enum class State {
         UP, DOWN, NONE
@@ -37,7 +36,7 @@ class Movement(
 
         when {
             isUp -> {
-                if (currentState == State.DOWN && correctReps != totalReps) {
+                if (currentState == State.DOWN) {
                     correctReps++
                 }
                 currentState = State.UP
@@ -53,8 +52,9 @@ class Movement(
             onCorrectiveFeedback?.invoke(feedback)
         }
 
-        val firstAngle = currentAngles.values.firstOrNull()
-        onProgressUpdate?.invoke(firstAngle?.toFloat() ?: 0f)
+        val firstAngle = upStateAngles.keys.toList()[0]
+        val angle = currentAngles[firstAngle]
+        onProgressUpdate?.invoke(angle?.toFloat() ?: 0f)
     }
 
     private fun anglesWithinTolerance(
@@ -70,10 +70,6 @@ class Movement(
 
 
     fun getFeedback(): String {
-        return if (correctReps > 0) {
-            "$correctReps/$totalReps"
-        } else {
-            "Start moving to begin counting the reps!"
-        }
+        return "$correctReps"
     }
 }

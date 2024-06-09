@@ -16,10 +16,9 @@ object MainViewModelConfig{
                 KEYPOINTS.R_KNEE.value to 90,
             ),
             tolerance = 20,
-            totalReps = 12
         ),
         Movement(
-            name = "Bicep Flex",
+            name = "Bicep Curl",
             upStateAngles = mapOf(
                 KEYPOINTS.L_ELBOW.value to 90,
                 KEYPOINTS.R_ELBOW.value to 90,
@@ -28,21 +27,19 @@ object MainViewModelConfig{
                 KEYPOINTS.L_ELBOW.value to 180,
                 KEYPOINTS.R_ELBOW.value to 180,
             ),
-            tolerance = 30,
-            totalReps = 8
+            tolerance = 20,
         ),
         Movement(
             name = "Shoulder Press",
             upStateAngles = mapOf(
-                KEYPOINTS.L_ELBOW.value to 130,
-                KEYPOINTS.R_ELBOW.value to 130,
+                KEYPOINTS.L_ELBOW.value to 180,
+                KEYPOINTS.R_ELBOW.value to 180,
             ),
             downStateAngles = mapOf(
                 KEYPOINTS.L_ELBOW.value to 90,
                 KEYPOINTS.R_ELBOW.value to 90,
             ),
-            tolerance = 20,
-            totalReps = 10
+            tolerance = 30,
         ),
     )
 }

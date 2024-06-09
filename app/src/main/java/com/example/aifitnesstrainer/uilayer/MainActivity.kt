@@ -47,6 +47,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.runInterruptible
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -76,7 +77,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
 
         viewModel.registerSpeakCallback { text ->
             lifecycleScope.launch {
-                runBlocking {
+                run {
                     speak(text)
                 }
             }
@@ -94,7 +95,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
                     val movementProgress by viewModel.movementProgress.collectAsState()
                     val feedback by viewModel.feedback.collectAsState()
 
-                    Column(modifier=Modifier.fillMaxSize()) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         Box(modifier = Modifier.weight(1f)) {
                             CameraPreview(
                                 isFrontCamera = isFrontCamera,
@@ -104,10 +105,15 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
                             )
                             InferenceTimeView(inferenceTime = inferenceTime)
                             OverlayViewComposable(results = results, jointAngles = jointAngles)
-                            FeedbackView(feedback = feedback)
-                            MovementStatusView(viewModel = viewModel)
                         }
-                        MovementProgressBar(progress = movementProgress)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            MovementProgressBar(progress = movementProgress)
+                            FeedbackView(feedback = feedback)
+                        }
                         MovementSwitcher(viewModel)
                     }
                 }
@@ -178,30 +184,6 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
             Log.e("LIFECYCLE OPENAI", e.toString())
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
         }
-    }
-}
-
-@Composable
-fun MovementStatusView(viewModel: MainViewModel) {
-    val movementStatus by viewModel.movementStatus.collectAsState()
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Text(
-            text = movementStatus,
-            color = Color.Black,
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Serif,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .background(Color.White.copy(alpha = 0.8f))
-                .padding(8.dp)
-                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                .shadow(4.dp, shape = RoundedCornerShape(8.dp))
-        )
     }
 }
 

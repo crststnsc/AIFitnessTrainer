@@ -4,7 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,17 +27,16 @@ import com.example.aifitnesstrainer.uilayer.viewmodels.MainViewModel
 
 @Composable
 fun FeedbackView(feedback: String) {
-
     Box(
         modifier = Modifier
-            .fillMaxSize()
+            .width(100.dp).height(100.dp)
             .padding(16.dp),
-        contentAlignment = Alignment.TopEnd
+        contentAlignment = Alignment.TopCenter
     ) {
         Text(
             text = feedback,
-            color = Color.Black,
-            fontSize = 20.sp,
+            color = Color.White,
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Serif,
             textAlign = TextAlign.End,

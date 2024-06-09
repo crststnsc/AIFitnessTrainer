@@ -10,6 +10,7 @@ import com.example.aifitnesstrainer.datalayer.models.KEYPOINTS
 import com.example.aifitnesstrainer.datalayer.models.Movement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.sqrt
 
@@ -65,7 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _jointAngles.value = jointAngles
 
             activeMovement?.updateAngles(jointAngles, correctiveFeedbackAnalyzer)
-            _feedback.value = activeMovement?.getFeedback() ?: "Please select a movement"
+            _feedback.value = activeMovement?.getFeedback() ?: "0"
         } else {
             _jointAngles.value = emptyMap()
         }
@@ -80,9 +81,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         activeMovement?.onProgressUpdate = { progress ->
-            val maxAngle = activeMovement?.upStateAngles?.values?.first() ?: 1
-            _movementProgress.value = (progress) / maxAngle
+            val downAngle = activeMovement?.downStateAngles?.values?.first() ?: 0
+            val upAngle = activeMovement?.upStateAngles?.values?.first() ?: 1
+
+            val movementRange = abs(upAngle - downAngle)
+            val normalizedProgress = if (downAngle < upAngle) {
+                ((progress - downAngle).coerceIn(0f, movementRange.toFloat())) / movementRange.toFloat()
+            } else {
+                ((downAngle - progress).coerceIn(0f, movementRange.toFloat())) / movementRange.toFloat()
+            }
+
+            _movementProgress.value = normalizedProgress
         }
+
 
         activeMovement?.onCorrectiveFeedback = { feedback ->
             speakCallback?.invoke(feedback)
