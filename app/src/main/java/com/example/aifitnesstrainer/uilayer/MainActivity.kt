@@ -54,13 +54,14 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
     private val viewModel: MainViewModel by viewModels()
     private lateinit var textToSpeech: TextToSpeech
     private lateinit var openai: OpenAI
+    private val token = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
         textToSpeech = TextToSpeech(this, this)
 
-        val token = ""
+
 
         openai = OpenAI(
             token = token,
@@ -146,7 +147,7 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
     private suspend fun speak(text: String) {
         val isConnected = checkForInternet(this)
 
-        if(!isConnected){
+        if(!isConnected || token.isEmpty()){
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
             return
         }
