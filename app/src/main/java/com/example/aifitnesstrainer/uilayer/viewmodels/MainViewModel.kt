@@ -2,6 +2,8 @@ package com.example.aifitnesstrainer.uilayer.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.aifitnesstrainer.datalayer.ml.KeyPoint
 import com.example.aifitnesstrainer.datalayer.models.BoundingBox
 import com.example.aifitnesstrainer.datalayer.models.Constants
@@ -35,8 +37,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _movements = MutableStateFlow(MainViewModelConfig.movements)
     val movements: StateFlow<List<Movement>> = _movements
 
-    private var activeMovement: Movement? = null
+    var activeMovement: Movement? = null
     private var speakCallback: ((String) -> Unit)? = null
+
+    var _activeMovementString = MutableStateFlow("")
+    val selectedMovement = _activeMovementString
 
     private val _movementStatus = MutableStateFlow("not moving")
     val movementStatus: StateFlow<String> = _movementStatus
@@ -75,6 +80,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun switchActiveMovement(movementName: String) {
         activeMovement = _movements.value.find { it.name == movementName }
         speakCallback?.invoke("Starting $movementName.")
+
+        _activeMovementString.value = movementName
 
         activeMovement?.onRepComplete = { reps ->
             speakCallback?.invoke("You have completed $reps reps")

@@ -32,12 +32,48 @@ object MainViewModelConfig{
         Movement(
             name = "Shoulder Press",
             upStateAngles = mapOf(
-                KEYPOINTS.L_ELBOW.value to 180,
-                KEYPOINTS.R_ELBOW.value to 180,
+                KEYPOINTS.L_ELBOW.value to 160,
+                KEYPOINTS.R_ELBOW.value to 160,
             ),
             downStateAngles = mapOf(
-                KEYPOINTS.L_ELBOW.value to 90,
-                KEYPOINTS.R_ELBOW.value to 90,
+                KEYPOINTS.L_ELBOW.value to 70,
+                KEYPOINTS.R_ELBOW.value to 70,
+            ),
+            tolerance = 30,
+        ),
+        Movement(
+            name = "Push-ups",
+            upStateAngles = mapOf(
+                KEYPOINTS.L_ELBOW.value to 160,
+                KEYPOINTS.R_ELBOW.value to 160,
+            ),
+            downStateAngles = mapOf(
+                KEYPOINTS.L_ELBOW.value to 70,
+                KEYPOINTS.R_ELBOW.value to 70,
+            ),
+            tolerance = 30,
+        ),
+        Movement(
+            name = "Lounge Right Leg",
+            upStateAngles = mapOf(
+                KEYPOINTS.R_KNEE.value to 160,
+                KEYPOINTS.L_KNEE.value to 160,
+            ),
+            downStateAngles = mapOf(
+                KEYPOINTS.R_KNEE.value to 70,
+                KEYPOINTS.L_KNEE.value to 160,
+            ),
+            tolerance = 30,
+        ),
+        Movement(
+            name = "Lounge Left Leg",
+            upStateAngles = mapOf(
+                KEYPOINTS.R_KNEE.value to 160,
+                KEYPOINTS.L_KNEE.value to 160,
+            ),
+            downStateAngles = mapOf(
+                KEYPOINTS.L_KNEE.value to 70,
+                KEYPOINTS.R_KNEE.value to 160,
             ),
             tolerance = 30,
         ),

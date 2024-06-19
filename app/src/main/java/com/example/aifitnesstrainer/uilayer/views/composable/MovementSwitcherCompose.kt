@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -24,11 +25,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -43,6 +46,7 @@ fun MovementSwitcher(
     viewModel: MainViewModel
 ) {
     val movementsNames = viewModel.getMovementNames()
+    val activeMovement by viewModel._activeMovementString.collectAsState()
 
     LazyRow(
         modifier = Modifier
@@ -50,7 +54,10 @@ fun MovementSwitcher(
             .fillMaxWidth()
     ) {
         items(movementsNames) { movement ->
-            Button(onClick = { viewModel.switchActiveMovement(movement) }) {
+            val isSelected = movement == activeMovement
+
+            Button(onClick = { viewModel.switchActiveMovement(movement) },
+                colors = ButtonDefaults.buttonColors(if (isSelected) Color.Cyan else Color.Gray)) {
                 Text(movement)
             }
             Spacer(modifier = Modifier.width(8.dp))

@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.StrokeCap
@@ -31,6 +33,12 @@ fun MovementProgressBar(progress: Float) {
         val maxSweepAngle = 180f
         val sweepAngle = progress * maxSweepAngle
 
+        val gradientBrush = Brush.linearGradient(
+            colors = listOf(Color.Red, Color.Green),
+            start = Offset.Zero,
+            end = Offset(size.width, size.height)
+        )
+
         drawArc(
             color = Color.DarkGray,
             startAngle = startAngle,
@@ -40,7 +48,7 @@ fun MovementProgressBar(progress: Float) {
         )
 
         drawArc(
-            color = Color.LightGray,
+            brush = gradientBrush,
             startAngle = startAngle,
             sweepAngle = sweepAngle,
             useCenter = false,
