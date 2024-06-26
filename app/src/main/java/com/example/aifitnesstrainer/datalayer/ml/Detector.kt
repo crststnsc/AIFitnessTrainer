@@ -130,7 +130,6 @@ class Detector(
                 if (x2 <= 0F || x2 >= tensorWidth) continue
                 if (y2 <= 0F || y2 >= tensorHeight) continue
 
-                // Extract keypoints
                 val keypoints = mutableListOf<KeyPoint>()
                 for (k in 0 until 16) {
                     var kx = array[c + numElements * (5 + k * 2)]

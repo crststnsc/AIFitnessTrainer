@@ -84,7 +84,7 @@ fun CameraPreview(
                 Icon(
                     painter = painterResource(id = R.drawable.outline_cameraswitch_24),
                     contentDescription = "Switch Camera",
-                    tint = Color.Black,
+                    tint = Color.White,
                     modifier = Modifier.fillMaxSize()
                 )
             }

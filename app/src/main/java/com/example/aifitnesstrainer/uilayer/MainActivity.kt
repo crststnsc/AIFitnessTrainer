@@ -61,8 +61,6 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
         cameraExecutor = Executors.newSingleThreadExecutor()
         textToSpeech = TextToSpeech(this, this)
 
-
-
         openai = OpenAI(
             token = token,
             timeout = Timeout(socket = 5.seconds),
@@ -133,13 +131,13 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
     }
 
     override fun onEmptyDetect() {
-        thread {
+        thread{
             viewModel.clearResults()
         }
     }
 
     override fun onDetect(boundingBoxes: List<BoundingBox>, inferenceTime: Long) {
-        thread {
+        thread{
             viewModel.updateResults(boundingBoxes, inferenceTime)
         }
     }
@@ -179,8 +177,8 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
         )
 
         CoroutineScope(Dispatchers.Default).launch {
-            audioTrack.play()
             audioTrack.write(rawAudio, 0, rawAudio.size)
+            audioTrack.play()
 
             while (audioTrack.playState == AudioTrack.PLAYSTATE_PLAYING) {
                 delay(100)
@@ -191,32 +189,13 @@ class MainActivity : ComponentActivity(), Detector.DetectorListener, TextToSpeec
     }
 
     private fun checkForInternet(context: Context): Boolean {
-
-        // register activity with the connectivity manager service
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        // if the android version is equal to M
-        // or greater we need to use the
-        // NetworkCapabilities to check what type of
-        // network has the internet connection
-
-        // Returns a Network object corresponding to
-        // the currently active default data network.
         val network = connectivityManager.activeNetwork ?: return false
 
-        // Representation of the capabilities of an active network.
         val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-
         return when {
-            // Indicates this network uses a Wi-Fi transport,
-            // or WiFi has network connectivity
             activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-
-            // Indicates this network uses a Cellular transport. or
-            // Cellular has network connectivity
             activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-
-            // else return false
             else -> false
         }
     }

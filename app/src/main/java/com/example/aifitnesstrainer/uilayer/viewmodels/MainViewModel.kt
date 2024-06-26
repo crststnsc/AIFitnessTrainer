@@ -35,16 +35,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val correctiveFeedbackAnalyzer = CorrectiveFeedback()
 
     private val _movements = MutableStateFlow(MainViewModelConfig.movements)
-    val movements: StateFlow<List<Movement>> = _movements
 
-    var activeMovement: Movement? = null
+    private var activeMovement: Movement? = null
     private var speakCallback: ((String) -> Unit)? = null
 
     var _activeMovementString = MutableStateFlow("")
-    val selectedMovement = _activeMovementString
 
     private val _movementStatus = MutableStateFlow("not moving")
-    val movementStatus: StateFlow<String> = _movementStatus
 
     private fun updateMovementStatus(status: String) {
         _movementStatus.value = status
@@ -100,7 +97,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             _movementProgress.value = normalizedProgress
         }
-
 
         activeMovement?.onCorrectiveFeedback = { feedback ->
             speakCallback?.invoke(feedback)

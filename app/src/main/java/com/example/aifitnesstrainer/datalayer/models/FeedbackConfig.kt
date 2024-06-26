@@ -3,8 +3,10 @@ package com.example.aifitnesstrainer.datalayer.models
 object FeedbackConfig {
     val feedbackTargetJoints = mapOf(
         "Squat" to KEYPOINTS.R_HIP.value,
-        "Bicep Curl" to KEYPOINTS.L_WRIST.value,
-        "Shoulder Press" to KEYPOINTS.L_ELBOW.value
+        "Shoulder Press" to KEYPOINTS.L_ELBOW.value,
+        "Lateral Arm Raises" to KEYPOINTS.L_ELBOW.value,
+        "Lounge Left Leg" to KEYPOINTS.L_HIP.value,
+        "Lounge Right Leg" to KEYPOINTS.R_HIP.value,
     )
 
     val indexToKeyPointMap = mapOf(

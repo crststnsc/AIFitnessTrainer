@@ -90,8 +90,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     fun setResults(boundingBoxes: List<BoundingBox>, jointAngles: Map<Int, Int>) {
         results = boundingBoxes
         this.jointAngles = jointAngles
-        postInvalidate()
+        invalidate()
     }
-
 }
 
